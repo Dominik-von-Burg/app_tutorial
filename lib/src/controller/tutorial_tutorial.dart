@@ -67,7 +67,9 @@ class Tutorial {
 
   static clearEntries() {
     for (final entry in entries) {
-      entry.remove();
+      if (entry.mounted) {
+        entry.remove();
+      }
     }
     entries.clear();
   }
