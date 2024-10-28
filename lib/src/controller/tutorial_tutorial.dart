@@ -9,18 +9,20 @@ import 'package:app_tutorial/src/painter/painter.dart';
 class Tutorial {
   static List<OverlayEntry> entries = [];
   static late int count;
+  static OverlayState? overlayState;
+  static Completer<void>? tutorialCompleter;
 
   static Future<void> showTutorial(
       BuildContext context, List<TutorialItem> children,
       {required VoidCallback onTutorialComplete}) async {
     clearEntries();
     final size = MediaQuery.of(context).size;
-    OverlayState overlayState = Overlay.of(context);
+    overlayState = Overlay.of(context);
 
     count = 0;
 
     // Create a Completer to indicate when the tutorial is complete
-    Completer<void> tutorialCompleter = Completer<void>();
+    tutorialCompleter = Completer<void>();
 
     children.forEach((element) async {
       final offset = _capturePositionWidget(element.globalKey);
@@ -28,37 +30,25 @@ class Tutorial {
       entries.add(
         OverlayEntry(
           builder: (context) {
-            return GestureDetector(
-              onTap: () {
-                entries[count].remove();
-                count++;
-                if (count < entries.length) {
-                  overlayState.insert(entries[count]);
-                } else {
-                  // If this is the last tutorial step, complete the tutorial
-                  tutorialCompleter.complete();
-                }
-              },
-              child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: Stack(
-                  children: [
-                    CustomPaint(
-                      size: size,
-                      painter: HolePainter(
-                        shapeFocus: element.shapeFocus,
-                        dx: offset.dx + (sizeWidget.width / 2),
-                        dy: offset.dy + (sizeWidget.height / 2),
-                        width: sizeWidget.width,
-                        height: sizeWidget.height,
-                        color: element.color,
-                        borderRadius: element.borderRadius,
-                        radius: element.radius,
-                      ),
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Stack(
+                children: [
+                  CustomPaint(
+                    size: size,
+                    painter: HolePainter(
+                      shapeFocus: element.shapeFocus,
+                      dx: offset.dx + (sizeWidget.width / 2),
+                      dy: offset.dy + (sizeWidget.height / 2),
+                      width: sizeWidget.width,
+                      height: sizeWidget.height,
+                      color: element.color,
+                      borderRadius: element.borderRadius,
+                      radius: element.radius,
                     ),
-                    element.child,
-                  ],
-                ),
+                  ),
+                  element.child,
+                ],
               ),
             );
           },
@@ -66,10 +56,10 @@ class Tutorial {
       );
     });
 
-    overlayState.insert(entries[0]);
+    overlayState?.insert(entries[0]);
 
     // Wait until the tutorialCompleter.future is completed to indicate the tutorial is finished
-    await tutorialCompleter.future;
+    await tutorialCompleter?.future;
 
     // If the onTutorialComplete function is provided, call it
     onTutorialComplete();
@@ -82,6 +72,28 @@ class Tutorial {
   static skipAll(BuildContext context) {
     entries[count].remove();
     count++;
+  }
+
+  static next(BuildContext context) {
+    entries[count].remove();
+    count++;
+    if (count < entries.length) {
+      overlayState?.insert(entries[count]);
+    } else {
+      // If this is the last tutorial step, complete the tutorial
+      tutorialCompleter?.complete();
+    }
+  }
+
+  static previous(BuildContext context) {
+    if (count == 0) {
+      return;
+    }
+    entries[count].remove();
+    count--;
+    if (count < entries.length) {
+      overlayState?.insert(entries[count]);
+    }
   }
 
   /// This method returns the position of the widget
