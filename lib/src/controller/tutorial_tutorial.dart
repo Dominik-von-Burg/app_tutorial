@@ -85,6 +85,10 @@ class Tutorial {
     }
   }
 
+  static bool hasPrevious() {
+    return count > 0;
+  }
+
   static previous(BuildContext context) {
     if (count == 0) {
       return;
