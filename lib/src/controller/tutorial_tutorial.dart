@@ -66,6 +66,9 @@ class Tutorial {
   }
 
   static clearEntries() {
+    for (final entry in entries) {
+      entry.remove();
+    }
     entries.clear();
   }
 
@@ -89,15 +92,17 @@ class Tutorial {
     return count > 0;
   }
 
+  static bool isLast() {
+    return count >= entries.length;
+  }
+
   static previous(BuildContext context) {
     if (count == 0) {
       return;
     }
     entries[count].remove();
     count--;
-    if (count < entries.length) {
-      overlayState?.insert(entries[count]);
-    }
+    overlayState?.insert(entries[count]);
   }
 
   /// This method returns the position of the widget
