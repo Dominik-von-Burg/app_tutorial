@@ -93,7 +93,7 @@ class Tutorial {
   }
 
   static bool isLast() {
-    return count >= entries.length;
+    return count >= entries.length - 1;
   }
 
   static previous(BuildContext context) {
