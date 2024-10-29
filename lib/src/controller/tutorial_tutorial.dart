@@ -77,6 +77,7 @@ class Tutorial {
   static skipAll(BuildContext context) {
     entries[count].remove();
     count++;
+    tutorialCompleter?.complete();
   }
 
   static next(BuildContext context) {
